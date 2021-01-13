@@ -40,11 +40,16 @@ const hostname = process.env.HOST;
 const port = process.env.PORT;
 const Sessionssecret = process.env.SESSION_SECRET;
 
-const db = mysql.createPool({
+const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PW,
   database: process.env.DB_DATABASE,
+});
+
+db.connect((err) => {
+  if (err) throw err;
+  console.log("Mysql Connected...");
 });
 
 //-----------------------------------------------AUTHENTICATION----------------------------------------------------
@@ -116,6 +121,7 @@ app.post("/login", (req, res) => {
     (err, result) => {
       if (err) {
         res.send({ err: err });
+        console.log(err);
       }
       if (result.length > 0) {
         bcrypt.compare(password, result[0].password, (error, response) => {
