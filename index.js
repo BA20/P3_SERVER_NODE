@@ -52,9 +52,6 @@ db.connect((err) => {
   console.log("Mysql Connected...");
 });
 
-db.query("SELECT * FROM `User`;", (err, result) => {
-  console.log(result);
-});
 //-----------------------------------------------AUTHENTICATION----------------------------------------------------
 app.post("/register", (req, res) => {
   const username = req.body.username;
