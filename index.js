@@ -122,35 +122,46 @@ app.post("/login", (req, res) => {
     "SELECT * FROM admin WHERE username = ?;",
     username,
     (err, result) => {
+      console.log(result);
       if (err) {
         res.send({ err: err });
         console.log(err);
       }
       if (result.length > 0) {
-        bcrypt.compare(password, result[0].password, (error, response) => {
-          if (response) {
-            console.log(response);
-
-            /* console.log("Entrou");
-            const id = result[0].username;*/
-            const token = jwt.sign({ username }, `${Sessionssecret}`, {
-              expiresIn: 300, // 5 min
-            });
-
-            req.session.user = result;
-            console.log(req.session.user);
-            res.json({
-              auth: true,
-              token: token,
-              message: "Login com Sucesso",
-              result: result,
-            });
-          } else {
-            res.json({
-              auth: false,
-              message: "Username e/ou Password Errados!",
-            });
+        bcrypt.hash(password, saltRounds, (err, hash) => {
+          if (err) {
+            console.log(err);
           }
+          console.log(result[0].password + " result ");
+          bcrypt.compare(password, result[0].password, (error, response) => {
+            console.log(password + " pass");
+            console.log(hash + " hash");
+            console.log(result[0].password);
+            if (response) {
+              console.log(response + " ENTROU");
+
+              /* console.log("Entrou");
+            const id = result[0].username;*/
+              const token = jwt.sign({ username }, `${Sessionssecret}`, {
+                expiresIn: 300, // 5 min
+              });
+
+              req.session.user = result;
+              console.log(req.session.user);
+              res.json({
+                auth: true,
+                token: token,
+                message: "Login com Sucesso",
+                result: result,
+              });
+            } else {
+              console.log(error + "Bcript erro");
+              res.json({
+                auth: false,
+                message: "Username e/ou Password Errados!",
+              });
+            }
+          });
         });
       } else {
         res.json({ auth: false, message: "Não existe este user" });
