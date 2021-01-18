@@ -52,6 +52,9 @@ db.connect((err) => {
   console.log("Mysql Connected...");
 });
 
+db.query("SELECT * FROM admin;", (err, result) => {
+  console.log(result);
+});
 //-----------------------------------------------AUTHENTICATION----------------------------------------------------
 app.post("/register", (req, res) => {
   const username = req.body.username;
@@ -116,7 +119,7 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
   db.query(
-    "SELECT * FROM admin WHERE username =?;",
+    "SELECT * FROM admin WHERE username = ?;",
     username,
     (err, result) => {
       if (err) {
@@ -126,7 +129,10 @@ app.post("/login", (req, res) => {
       if (result.length > 0) {
         bcrypt.compare(password, result[0].password, (error, response) => {
           if (response) {
-            const id = result[0].username;
+            console.log(response);
+
+            /* console.log("Entrou");
+            const id = result[0].username;*/
             const token = jwt.sign({ username }, `${Sessionssecret}`, {
               expiresIn: 300, // 5 min
             });
