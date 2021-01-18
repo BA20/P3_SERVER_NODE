@@ -52,7 +52,7 @@ db.connect((err) => {
   console.log("Mysql Connected...");
 });
 
-db.query("SELECT * FROM admin;", (err, result) => {
+db.query("SELECT * FROM `User`;", (err, result) => {
   console.log(result);
 });
 //-----------------------------------------------AUTHENTICATION----------------------------------------------------
@@ -132,14 +132,12 @@ app.post("/login", (req, res) => {
           if (err) {
             console.log(err);
           }
-          console.log(result[0].password + " result ");
+
           bcrypt.compare(password, result[0].password, (error, response) => {
             console.log(password + " pass");
             console.log(hash + " hash");
             console.log(result[0].password);
             if (response) {
-              console.log(response + " ENTROU");
-
               /* console.log("Entrou");
             const id = result[0].username;*/
               const token = jwt.sign({ username }, `${Sessionssecret}`, {
@@ -147,7 +145,7 @@ app.post("/login", (req, res) => {
               });
 
               req.session.user = result;
-              console.log(req.session.user);
+
               res.json({
                 auth: true,
                 token: token,
@@ -155,7 +153,6 @@ app.post("/login", (req, res) => {
                 result: result,
               });
             } else {
-              console.log(error + "Bcript erro");
               res.json({
                 auth: false,
                 message: "Username e/ou Password Errados!",
@@ -169,6 +166,49 @@ app.post("/login", (req, res) => {
     }
   );
 });
+//---------------------------User----------------------------------------
+app.post("/createUser", (req, res) => {
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+  const tlm = req.body.tlm;
+  const tipo = req.body.tipo;
+
+  db.query(
+    "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,?)",
+    [name, email, password, tlm, tipo],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json("Utilizador Criado!");
+      }
+    }
+  );
+});
+
+app.get("/users", (req, res) => {
+  db.query("SELECT * FROM `User`;", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.delete("/deleteUser/:iduser", (req, res) => {
+  const id = req.params.id;
+
+  db.query("DELETE FROM `User` WHERE ?;", id, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      res.json(`User id: ${id} foi eliminado!`);
+    }
+  });
+});
 
 //---------------------------Atleta--------------------------------------
 app.post("/createatleta", (req, res) => {
@@ -179,7 +219,7 @@ app.post("/createatleta", (req, res) => {
   const wage = req.body.wage;
 
   db.query(
-    "INSERT INTO employees (name, age, country, position, wage) VALUES (?,?,?,?,?)",
+    "INSERT INTO `Athlete`(`idAthlete`, `Name`, `PhoneNumber`, `Email`, `Height`, `Weight`, `ArmSpan`, `idPhysicalData`, `BirthDate`, `idUser`) VALUES ([value-1],[value-2],[value-3],[value-4],[value-5],[value-6],[value-7],[value-8],[value-9],[value-10])",
     [name, age, country, position, wage],
     (err, result) => {
       if (err) {
