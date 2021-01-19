@@ -131,9 +131,6 @@ app.post("/login", (req, res) => {
           }
 
           bcrypt.compare(password, result[0].password, (error, response) => {
-            console.log(password + " pass");
-            console.log(hash + " hash");
-            console.log(result[0].password);
             if (response) {
               /* console.log("Entrou");
             const id = result[0].username;*/
