@@ -160,29 +160,28 @@ app.post("/login", (req, res) => {
     }
   );
 });
-//---------------------------User----------------------------------------
-app.post("/createUser", (req, res) => {
+//---------------------------UserPAIS----------------------------------------
+app.post("/createUserPais", (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
   const tlm = req.body.tlm;
-  const tipo = req.body.tipo;
 
   db.query(
-    "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,?)",
+    "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,0)",
     [name, email, password, tlm, tipo],
     (err, result) => {
       if (err) {
         console.log(err);
       } else {
-        res.json("Utilizador Criado!");
+        res.json("Utilizador PAI Criado!");
       }
     }
   );
 });
 
-app.get("/users", (req, res) => {
-  db.query("SELECT * FROM `User`;", (err, result) => {
+app.get("/usersPais", (req, res) => {
+  db.query("SELECT * FROM `User` WHERE Tipo = 0", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -191,7 +190,7 @@ app.get("/users", (req, res) => {
   });
 });
 
-app.delete("/deleteUser/:iduser", (req, res) => {
+app.delete("/deleteUser/:id", (req, res) => {
   const id = req.params.id;
 
   db.query("DELETE FROM `User` WHERE ?;", id, (err, result) => {
@@ -199,7 +198,7 @@ app.delete("/deleteUser/:iduser", (req, res) => {
       console.log(err);
     } else {
       console.log(result);
-      res.json(`User id: ${id} foi eliminado!`);
+      res.json(`Utilizador de id: ${id} foi eliminado!`);
     }
   });
 });
