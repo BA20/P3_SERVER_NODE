@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: ["http://localhost:3000"],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
   })
 );
@@ -190,14 +190,14 @@ app.get("/usersPais", (req, res) => {
   });
 });
 
-app.delete("/deleteUser/:id", (req, res) => {
-  const id = req.params.id;
-
-  db.query("DELETE FROM `User` WHERE ?;", id, (err, result) => {
+app.post("/deleteUser", (req, res) => {
+  const id = req.body.id;
+  console.log("ID: --->" + id);
+  db.query("DELETE FROM `User` WHERE idUser=?;", [id], (err, result) => {
+    console.log("Entrou");
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
       res.json(`Utilizador de id: ${id} foi eliminado!`);
     }
   });
