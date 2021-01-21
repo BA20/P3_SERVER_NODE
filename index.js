@@ -191,11 +191,15 @@ app.post("/createUserPais", (req, res) => {
         }
         db.query(
           "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,0)",
-          [name, email, password, PhoneNumber],
+          [name, email, hash, PhoneNumber],
           (err, result) => {
             if (err) {
               console.log(err);
             }
+            res.json({
+              ResponseStatus: true,
+              mensagemStatus: "Enc. Educação Registado!",
+            });
           }
         );
       });
@@ -203,7 +207,7 @@ app.post("/createUserPais", (req, res) => {
       console.log("Enviar");
       res.json({
         ResponseStatus: false,
-        MensagemStatus: "Já existe este Email!",
+        mensagemStatus: "Já existe este Email!",
       });
     }
   });
