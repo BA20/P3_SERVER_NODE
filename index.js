@@ -165,19 +165,48 @@ app.post("/createUserPais", (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
-  const tlm = req.body.tlm;
+  const PhoneNumber = req.body.PhoneNumber;
 
-  db.query(
-    "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,0)",
-    [name, email, password, tlm, tipo],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json("Utilizador PAI Criado!");
-      }
-    }
+  console.log(
+    "name: " +
+      name +
+      " email: " +
+      email +
+      " pass: " +
+      password +
+      " " +
+      PhoneNumber
   );
+
+  db.query("SELECT * FROM `User` WHERE Email = ?", email, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+
+    if (result.length == 0) {
+      console.log("Entrou");
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        if (err) {
+          console.log(err);
+        }
+        db.query(
+          "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,0)",
+          [name, email, password, PhoneNumber],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            }
+          }
+        );
+      });
+    } else {
+      console.log("Enviar");
+      res.json({
+        ResponseStatus: false,
+        MensagemStatus: "Já existe este Email!",
+      });
+    }
+  });
 });
 
 app.get("/usersPais", (req, res) => {
@@ -192,9 +221,8 @@ app.get("/usersPais", (req, res) => {
 
 app.post("/deleteUser", (req, res) => {
   const id = req.body.id;
-  console.log("ID: --->" + id);
+
   db.query("DELETE FROM `User` WHERE idUser=?;", [id], (err, result) => {
-    console.log("Entrou");
     if (err) {
       console.log(err);
     } else {
