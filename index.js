@@ -184,7 +184,6 @@ app.post("/createUserPais", (req, res) => {
     }
 
     if (result.length == 0) {
-      console.log("Entrou");
       bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
           console.log(err);
@@ -197,7 +196,6 @@ app.post("/createUserPais", (req, res) => {
               console.log(err);
             }
             res.json({
-              ResponseStatus: true,
               mensagemStatus: "Enc. Educação Registado!",
             });
           }
@@ -206,7 +204,6 @@ app.post("/createUserPais", (req, res) => {
     } else {
       console.log("Enviar");
       res.json({
-        ResponseStatus: false,
         mensagemStatus: "Já existe este Email!",
       });
     }
