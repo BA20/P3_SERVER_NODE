@@ -331,13 +331,14 @@ app.put("/updateatleta", (req, res) => {
   );
 });
 
-app.delete("/delete/:idatleta", (req, res) => {
-  const id = req.params.id;
-  db.query("DELETE FROM employees WHERE id = ?", id, (err, result) => {
+app.post("/deleteAtleta", (req, res) => {
+  const id = req.body.id;
+
+  db.query("DELETE FROM `Athlete` WHERE idAthlete=?;", [id], (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      res.send(result);
+      res.json(`Atleta de id: ${id} foi eliminado!`);
     }
   });
 });
@@ -399,6 +400,373 @@ app.get("/usersTreinador", (req, res) => {
       res.json(result);
     }
   });
+});
+
+//---------------------------Team----------------------------------------
+
+app.get("/teams", (req, res) => {
+  db.query("SELECT * FROM `Team`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createTeam", (req, res) => {
+  const idUser = req.body.idUser;
+  const idEscalao_team = req.body.idEscalao_team;
+  const Name = req.body.Name;
+
+  db.query(
+    "SELECT `idTeam`, `iduser`, `idEscalao_team`, `Name` FROM `Team` WHERE Name = ?",
+    Name,
+    (err, result) => {
+      if (err) {
+        res.send({ err: err });
+      }
+      console.log(result);
+
+      if (err) {
+        console.log(err);
+      }
+      db.query(
+        "INSERT INTO `Team`( `iduser`, `idEscalao_team`, `Name`) VALUES (?,?,?)",
+        [idUser, idEscalao_team, Name],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          res.json({
+            mensagemStatus: "Equipa Registada!",
+          });
+        }
+      );
+    }
+  );
+});
+app.post("/deleteTeam", (req, res) => {
+  const id = req.body.id;
+
+  db.query("DELETE FROM `Team` WHERE idTeam =?;", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(`Equipa de id: ${id} foi eliminada!`);
+    }
+  });
+});
+
+//---------------------------ESCALÃO----------------------------------------
+app.get("/escalao", (req, res) => {
+  db.query("SELECT * FROM `Team`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createEscalao", (req, res) => {
+  const Descricao = req.body.Descricao;
+  const Name = req.body.Name;
+
+  db.query("SELECT * FROM `Escalao` WHERE Name=?", Name, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `Escalao`( `Name`, `Descricao`) VALUES (?,?)",
+      [Name, Descricao],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Escalão Registada!",
+        });
+      }
+    );
+  });
+});
+app.post("/deleteEscalao", (req, res) => {
+  const id = req.body.id;
+
+  db.query("DELETE FROM `Escalao` WHERE idEscalao =?;", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(`Escalaode id: ${id} foi eliminado!`);
+    }
+  });
+});
+//---------------------------Event----------------------------------------
+app.get("/event", (req, res) => {
+  db.query("SELECT * FROM `Events`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createEvent", (req, res) => {
+  const ev_inicio = req.body.ev_inicio;
+  const ev_fim = req.body.ev_fim;
+  const idteam = req.body.idteam;
+  const idestado = req.body.idestado;
+  const local = req.body.local;
+
+  db.query(
+    "INSERT INTO `Events`( `ev_inicio`, `ev_fim`, `idteam`, `idestado`, `local`) VALUES (?,?,?,?,?)",
+    [ev_inicio, ev_fim, idteam, idestado, local],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      res.json({
+        mensagemStatus: "Evento Registado!",
+      });
+    }
+  );
+});
+app.post("/deleteEvent", (req, res) => {
+  const id = req.body.id;
+
+  db.query("DELETE FROM `Events` WHERE idevents =?;", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(`Evento de id: ${id} foi eliminado!`);
+    }
+  });
+});
+//---------------------------Exercicio----------------------------------------
+app.get("/exercise", (req, res) => {
+  db.query("SELECT * FROM `Exercise`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createExercise", (req, res) => {
+  const Name = req.body.Name;
+  const Descrição = req.body.Descrição;
+  const ObjectivoEsp = req.body.ObjectivoEsp;
+  const CriterioSucess = req.body.CriterioSucess;
+  const Duration = req.body.Duration;
+  const Esquema_link = req.body.Esquema_link;
+
+  db.query("SELECT * FROM `Exercise` WHERE Name=?", Name, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `Exercise`(`Name`, `Descrição`, `ObjectivoEsp`, `CriterioSucess`, `Duration`, `Esquema_link`) VALUES (?,?,?,?,?,?)",
+      [Name, Descrição, ObjectivoEsp, CriterioSucess, Duration, Esquema_link],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Exercicio Registado!",
+        });
+      }
+    );
+  });
+});
+app.post("/deleteExercise", (req, res) => {
+  const id = req.body.id;
+
+  db.query(
+    "DELETE FROM `Exercise` WHERE idExercise=?;",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(`Exercicio de id: ${id} foi eliminado!`);
+      }
+    }
+  );
+});
+//---------------------------Gesto TEcnico----------------------------------------
+app.get("/GestoTecnico", (req, res) => {
+  db.query("SELECT * FROM `GestoTecnico`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createGestoTecnico", (req, res) => {
+  const nome = req.body.nome;
+  const Descrição = req.body.Descrição;
+
+  db.query("SELECT * FROM `GestoTecnico` WHERE nome=?", Name, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `GestoTecnico`( `nome`, `Descrição`) VALUES (?,?)",
+      [nome, Descrição],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Gesto Tecnico Registado!",
+        });
+      }
+    );
+  });
+});
+app.post("/deleteGestoTecnico", (req, res) => {
+  const id = req.body.id;
+
+  db.query(
+    "DELETE FROM `GestoTecnico` WHERE idGestoTecnico=?;",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(`GestoTecnico de id: ${id} foi eliminado!`);
+      }
+    }
+  );
+});
+//---------------------------SetExercise ----------------------------------------
+app.get("/SetExercise", (req, res) => {
+  db.query("SELECT * FROM `SetExercise`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createSetExercise", (req, res) => {
+  const nome = req.body.nome;
+
+  db.query("SELECT * FROM `SetExercise` WHERE Name=?", Name, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `SetExercise` (`Name`) VALUES (?)",
+      [nome],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Set Registado!",
+        });
+      }
+    );
+  });
+});
+app.post("/deleteSetExercise", (req, res) => {
+  const id = req.body.id;
+
+  db.query(
+    "DELETE FROM `SetExercise` WHERE idSetExercise?;",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(`GestoTecnico de id: ${id} foi eliminado!`);
+      }
+    }
+  );
+});
+//---------------------------Criterio ----------------------------------------
+app.get("/Criterio", (req, res) => {
+  db.query("SELECT * FROM `Criterio`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createCriterio", (req, res) => {
+  const Descrição = req.body.Descrição;
+  const idGesto = req.body.idGesto;
+  const Check = req.body.Check;
+  db.query(
+    "SELECT * FROM `SetExercise` WHERE Descrição=?",
+    Name,
+    (err, result) => {
+      if (err) {
+        res.send({ err: err });
+      }
+      console.log(result);
+
+      if (err) {
+        console.log(err);
+      }
+      db.query(
+        "INSERT INTO `Criterio`( `Descrição`, `idGesto`, `Check`) VALUES (?,?,?)",
+        [Descrição, idGesto, Check],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          res.json({
+            mensagemStatus: "Criterio Registado!",
+          });
+        }
+      );
+    }
+  );
+});
+app.post("/deleteCriterio", (req, res) => {
+  const id = req.body.id;
+
+  db.query(
+    "DELETE FROM `Criterio` WHERE idCriterio=?;",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(`Criterio de id: ${id} foi eliminado!`);
+      }
+    }
+  );
 });
 
 app.listen(port, () => {
