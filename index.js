@@ -178,11 +178,11 @@ app.post("/createUserPais", (req, res) => {
       PhoneNumber
   );
 
-  db.query("SELECT * FROM `User` WHERE Email = ?", email, (err, result) => {
+  db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
     if (err) {
       res.send({ err: err });
     }
-
+    console.log(result);
     if (result.length == 0) {
       bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
@@ -202,7 +202,6 @@ app.post("/createUserPais", (req, res) => {
         );
       });
     } else {
-      console.log("Enviar");
       res.json({
         mensagemStatus: "Já existe este Email!",
       });
@@ -233,34 +232,87 @@ app.post("/deleteUser", (req, res) => {
 });
 
 //---------------------------Atleta--------------------------------------
-app.post("/createatleta", (req, res) => {
-  const name = req.body.name;
-  const age = req.body.age;
-  const country = req.body.country;
-  const position = req.body.position;
-  const wage = req.body.wage;
 
+app.get("/getidpai", (req, res) => {
   db.query(
-    "INSERT INTO `Athlete`(`idAthlete`, `Name`, `PhoneNumber`, `Email`, `Height`, `Weight`, `ArmSpan`, `idPhysicalData`, `BirthDate`, `idUser`) VALUES ([value-1],[value-2],[value-3],[value-4],[value-5],[value-6],[value-7],[value-8],[value-9],[value-10])",
-    [name, age, country, position, wage],
+    "SELECT `idUser`, `Name` FROM `User` WHERE Tipo = 0",
     (err, result) => {
       if (err) {
         console.log(err);
       } else {
-        res.send("Values Inserted");
+        console.log(result);
+        var dataCas = [];
+        for (var i = 0; i < result.length; i++) {
+          dataCas.push(
+            JSON.parse(
+              `{"value":${result[i].idUser}, "label": "${result[i].Name}"}`
+            )
+          );
+        }
+        //var json = JSON.stringify(dataCas);
+        console.log("-----------------------");
+        console.log(dataCas);
+
+        res.json(dataCas);
       }
     }
   );
 });
 
-app.get("/atletas", (req, res) => {
-  db.query("SELECT * FROM vcvv1.athlete;", (err, result) => {
+app.post("/createatleta", (req, res) => {
+  const nameAtl = req.body.name;
+  const PhoneNumber = req.body.PhoneNumber;
+  const email = req.body.email;
+  const Height = req.body.Height;
+  const Weight = req.body.Weight;
+  const ArmSpan = req.body.ArmSpan;
+  const BirthDate = req.body.BirthDate;
+  const idUser = req.body.idUser;
+
+  db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
     if (err) {
-      console.log(err);
-    } else {
-      res.json(result);
+      res.send({ err: err });
+    }
+
+    if (result.length == 0) {
+      db.query(
+        "INSERT INTO `Athlete`(`NameAtl`, `PhoneNumber`, `Email`, `Height`, `Weight`, `ArmSpan`, `BirthDate`, `idUser`) VALUES (?,?,?,?,?,?,?,?)",
+        [
+          nameAtl,
+          PhoneNumber,
+          email,
+          Height,
+          Weight,
+          ArmSpan,
+          BirthDate,
+          idUser,
+        ],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          } else {
+            res.json({
+              mensagemStatus: "Atleta Criado!",
+            });
+          }
+        }
+      );
     }
   });
+});
+
+app.get("/atletas", (req, res) => {
+  db.query(
+    "SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(result);
+        res.json(result);
+      }
+    }
+  );
 });
 
 app.put("/updateatleta", (req, res) => {
@@ -286,6 +338,65 @@ app.delete("/delete/:idatleta", (req, res) => {
       console.log(err);
     } else {
       res.send(result);
+    }
+  });
+});
+
+//---------------------------UserTreinador----------------------------------------
+app.post("/createUserTreinador", (req, res) => {
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+  const PhoneNumber = req.body.PhoneNumber;
+
+  console.log(
+    "name: " +
+      name +
+      " email: " +
+      email +
+      " pass: " +
+      password +
+      " " +
+      PhoneNumber
+  );
+
+  db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+    console.log(result);
+    if (result.length == 0) {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        if (err) {
+          console.log(err);
+        }
+        db.query(
+          "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,1)",
+          [name, email, hash, PhoneNumber],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            }
+            res.json({
+              mensagemStatus: "Treinador Registado!",
+            });
+          }
+        );
+      });
+    } else {
+      res.json({
+        mensagemStatus: "Já existe este Email!",
+      });
+    }
+  });
+});
+
+app.get("/usersTreinador", (req, res) => {
+  db.query("SELECT * FROM `User` WHERE Tipo = 1", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
     }
   });
 });
