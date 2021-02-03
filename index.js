@@ -260,7 +260,7 @@ app.get("/getidpai", (req, res) => {
 });
 
 app.post("/createatleta", (req, res) => {
-  const nameAtl = req.body.name;
+  const nameAtl = req.body.nameAtl;
   const PhoneNumber = req.body.PhoneNumber;
   const email = req.body.email;
   const Height = req.body.Height;
@@ -291,6 +291,7 @@ app.post("/createatleta", (req, res) => {
           if (err) {
             console.log(err);
           } else {
+            console.log("Registo");
             res.json({
               mensagemStatus: "Atleta Criado!",
             });
