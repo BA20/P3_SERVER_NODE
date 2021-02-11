@@ -515,9 +515,9 @@ app.get("/getidEscalao", (req, res) => {
 
 app.post("/createEscalao", (req, res) => {
   const Descricao = req.body.Descricao;
-  const Name = req.body.Name;
+  const NameEs = req.body.Name;
 
-  db.query("SELECT * FROM `Escalao` WHERE Name=?", Name, (err, result) => {
+  db.query("SELECT * FROM `Escalao` WHERE NameEs=?", Name, (err, result) => {
     if (err) {
       res.send({ err: err });
     }
@@ -527,14 +527,14 @@ app.post("/createEscalao", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO `Escalao`( `Name`, `Descricao`) VALUES (?,?)",
-      [Name, Descricao],
+      "INSERT INTO `Escalao`( `NameEs`, `Descricao`) VALUES (?,?)",
+      [NameEs, Descricao],
       (err, result) => {
         if (err) {
           console.log(err);
         }
         res.json({
-          mensagemStatus: "Escalão Registada!",
+          mensagemStatus: "Escalão Registado!",
         });
       }
     );
@@ -715,30 +715,34 @@ app.get("/SetExercise", (req, res) => {
 });
 
 app.post("/createSetExercise", (req, res) => {
-  const nome = req.body.nome;
+  const NameSet = req.body.NameSet;
 
-  db.query("SELECT * FROM `SetExercise` WHERE Name=?", Name, (err, result) => {
-    if (err) {
-      res.send({ err: err });
-    }
-    console.log(result);
-
-    if (err) {
-      console.log(err);
-    }
-    db.query(
-      "INSERT INTO `SetExercise` (`Name`) VALUES (?)",
-      [nome],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        res.json({
-          mensagemStatus: "Set Registado!",
-        });
+  db.query(
+    "SELECT * FROM `SetExercise` WHERE NameSet=?",
+    NameSet,
+    (err, result) => {
+      if (err) {
+        res.send({ err: err });
       }
-    );
-  });
+      console.log(result);
+
+      if (err) {
+        console.log(err);
+      }
+      db.query(
+        "INSERT INTO `SetExercise` (`NameSet`) VALUES (?)",
+        [nome],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          res.json({
+            mensagemStatus: "Set Registado!",
+          });
+        }
+      );
+    }
+  );
 });
 app.post("/deleteSetExercise", (req, res) => {
   const id = req.body.id;
@@ -750,7 +754,7 @@ app.post("/deleteSetExercise", (req, res) => {
       if (err) {
         console.log(err);
       } else {
-        res.json(`GestoTecnico de id: ${id} foi eliminado!`);
+        res.json(`Set de id: ${id} foi eliminado!`);
       }
     }
   );
