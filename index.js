@@ -343,6 +343,30 @@ app.post("/deleteAtleta", (req, res) => {
 });
 
 //---------------------------UserTreinador----------------------------------------
+app.get("/getidtreinador", (req, res) => {
+  db.query(
+    "SELECT `idUser`, `Name` FROM `User` WHERE Tipo = 1",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(result);
+        var dataCas = [];
+        for (var i = 0; i < result.length; i++) {
+          dataCas.push(
+            JSON.parse(
+              `{"value":${result[i].idUser}, "label": "${result[i].Name}"}`
+            )
+          );
+        }
+        console.log(dataCas);
+
+        res.json(dataCas);
+      }
+    }
+  );
+});
+
 app.post("/createUserTreinador", (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
@@ -405,7 +429,8 @@ app.get("/usersTreinador", (req, res) => {
 
 app.get("/teams", (req, res) => {
   db.query(
-    "SELECT Team.idTeam, Escalao.NameEs ,  FROM `Team` INNER JOIN Escalao ON Team.idEscalao_team = Escalao.idEscalao",
+    //SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser
+    "SELECT Team.idTeam, Escalao.NameEs , Team.NameT, User.Name FROM Team INNER JOIN Escalao ON Team.idEscalao_team = Escalao.idEscalao INNER JOIN User ON Team.idtreinador = User.idUser",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -418,34 +443,31 @@ app.get("/teams", (req, res) => {
 
 app.post("/createTeam", (req, res) => {
   const idEscalao_team = req.body.idEscalao_team;
-  const Name = req.body.Name;
+  const NameT = req.body.NameT;
+  const idtreinador = req.body.idtreinador;
 
-  db.query(
-    "SELECT `idTeam`, `idEscalao_team`, `Name` FROM `Team` WHERE Name = ?",
-    Name,
-    (err, result) => {
-      if (err) {
-        res.send({ err: err });
-      }
-      console.log(result);
-
-      if (err) {
-        console.log(err);
-      }
-      db.query(
-        "INSERT INTO `Team`(`idEscalao_team`, `Name`) VALUES (?,?)",
-        [idEscalao_team, Name],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          res.json({
-            mensagemStatus: "Equipa Registada!",
-          });
-        }
-      );
+  db.query("SELECT * FROM `Team` WHERE NameT = ?", NameT, (err, result) => {
+    if (err) {
+      res.send({ err: err });
     }
-  );
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `Team`(`idEscalao_team`, `NameT`, `idtreinador`) VALUES (?,?,?)",
+      [idEscalao_team, NameT, idtreinador],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Equipa Registada!",
+        });
+      }
+    );
+  });
 });
 app.post("/deleteTeam", (req, res) => {
   const id = req.body.id;
@@ -461,11 +483,32 @@ app.post("/deleteTeam", (req, res) => {
 
 //---------------------------ESCALÃO----------------------------------------
 app.get("/escalao", (req, res) => {
-  db.query("SELECT * FROM `Team`", (err, result) => {
+  db.query("SELECT * FROM `Escalao`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
       res.json(result);
+    }
+  });
+});
+
+app.get("/getidEscalao", (req, res) => {
+  db.query("SELECT `idEscalao`, `NameEs` FROM `Escalao`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      var dataCas = [];
+      for (var i = 0; i < result.length; i++) {
+        dataCas.push(
+          JSON.parse(
+            `{"value":${result[i].idEscalao}, "label": "${result[i].NameEs}"}`
+          )
+        );
+      }
+      console.log(dataCas);
+
+      res.json(dataCas);
     }
   });
 });
