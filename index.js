@@ -594,6 +594,27 @@ app.post("/deleteEvent", (req, res) => {
   });
 });
 //---------------------------Exercicio----------------------------------------
+
+app.get("/getidexe", (req, res) => {
+  db.query("SELECT idExercise, Name FROM `Exercise`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      var dataCas = [];
+      for (var i = 0; i < result.length; i++) {
+        dataCas.push(
+          JSON.parse(
+            `{"value":${result[i].idExercise}, "label": "${result[i].Name}"}`
+          )
+        );
+      }
+      console.log(dataCas);
+
+      res.json(dataCas);
+    }
+  });
+});
 app.get("/exercise", (req, res) => {
   db.query("SELECT * FROM `Exercise`", (err, result) => {
     if (err) {
@@ -704,6 +725,27 @@ app.post("/deleteGestoTecnico", (req, res) => {
   );
 });
 //---------------------------SetExercise ----------------------------------------
+app.get("/getidset", (req, res) => {
+  db.query("SELECT * FROM `SetExercise`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      var dataCas = [];
+      for (var i = 0; i < result.length; i++) {
+        dataCas.push(
+          JSON.parse(
+            `{"value":${result[i].idSetExercise}, "label": "${result[i].NameSet}"}`
+          )
+        );
+      }
+      console.log(dataCas);
+
+      res.json(dataCas);
+    }
+  });
+});
+
 app.get("/SetExercise", (req, res) => {
   db.query("SELECT * FROM `SetExercise`", (err, result) => {
     if (err) {
@@ -812,6 +854,50 @@ app.post("/deleteCriterio", (req, res) => {
         console.log(err);
       } else {
         res.json(`Criterio de id: ${id} foi eliminado!`);
+      }
+    }
+  );
+});
+
+//---------------------------Exercicio Set ----------------------------------------
+app.get("/ExeSetExercise", (req, res) => {
+  db.query("SELECT * FROM `Ex_SetEx`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+app.post("/createExeSetExercise", (req, res) => {
+  const id_set = req.body.id_set;
+  const id_exe = req.body.id_exe;
+
+  db.query(
+    "INSERT INTO `Ex_SetEx`( `Extid`, `SetExid`) VALUES (?,?)",
+    [id_exe, id_set],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      res.json({
+        mensagemStatus: "Relação Exercício Set Registado!",
+      });
+    }
+  );
+});
+app.post("/deleteExeSetExercise", (req, res) => {
+  const id = req.body.id;
+
+  db.query(
+    "DELETE  FROM `Ex_SetEx` WHERE idEx_SetEx = ?;",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(`Relação Exercício Set de id: ${id} foi eliminado!`);
       }
     }
   );
