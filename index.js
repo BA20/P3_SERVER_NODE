@@ -773,7 +773,7 @@ app.post("/createSetExercise", (req, res) => {
       }
       db.query(
         "INSERT INTO `SetExercise` (`NameSet`) VALUES (?)",
-        [nome],
+        [NameSet],
         (err, result) => {
           if (err) {
             console.log(err);
@@ -860,14 +860,18 @@ app.post("/deleteCriterio", (req, res) => {
 });
 
 //---------------------------Exercicio Set ----------------------------------------
-app.get("/ExeSetExercise", (req, res) => {
-  db.query("SELECT * FROM `Ex_SetEx`", (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.json(result);
+app.get("/getExeSetExercise", (req, res) => {
+  db.query(
+    "SELECT Ex_SetEx.idEx_SetEx, Exercise.Name, SetExercise.NameSet FROM Ex_SetEx INNER JOIN Exercise ON Ex_SetEx.SetExid = Exercise.idExercise INNER JOIN SetExercise ON Ex_SetEx.SetExid = SetExercise.idSetExercise",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(result);
+        res.json(result);
+      }
     }
-  });
+  );
 });
 
 app.post("/createExeSetExercise", (req, res) => {
