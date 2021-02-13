@@ -708,28 +708,32 @@ app.post("/createGestoTecnico", (req, res) => {
   const nomeGT = req.body.nomeGT;
   const Descrição = req.body.Descrição;
 
-  db.query("SELECT * FROM `GestoTecnico` WHERE nome=?", Name, (err, result) => {
-    if (err) {
-      res.send({ err: err });
-    }
-    console.log(result);
-
-    if (err) {
-      console.log(err);
-    }
-    db.query(
-      "INSERT INTO `GestoTecnico`( `nomeGT`, `Descrição`) VALUES (?,?)",
-      [nomeGT, Descrição],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        res.json({
-          mensagemStatus: "Gesto Tecnico Registado!",
-        });
+  db.query(
+    "SELECT * FROM `GestoTecnico` WHERE nomeGT=?",
+    nomeGT,
+    (err, result) => {
+      if (err) {
+        res.send({ err: err });
       }
-    );
-  });
+      console.log(result);
+
+      if (err) {
+        console.log(err);
+      }
+      db.query(
+        "INSERT INTO `GestoTecnico`( `nomeGT`, `Descrição`) VALUES (?,?)",
+        [nomeGT, Descrição],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          res.json({
+            mensagemStatus: "Gesto Tecnico Registado!",
+          });
+        }
+      );
+    }
+  );
 });
 app.post("/deleteGestoTecnico", (req, res) => {
   const id = req.body.id;
