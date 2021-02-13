@@ -266,6 +266,7 @@ app.post("/createatleta", (req, res) => {
   const ArmSpan = req.body.ArmSpan;
   const BirthDate = req.body.BirthDate;
   const idUser = req.body.idUser;
+  const idTeam = req.body.idTeam;
 
   db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
     if (err) {
@@ -274,7 +275,7 @@ app.post("/createatleta", (req, res) => {
 
     if (result.length == 0) {
       db.query(
-        "INSERT INTO `Athlete`(`NameAtl`, `PhoneNumber`, `Email`, `Height`, `Weight`, `ArmSpan`, `BirthDate`, `idUser`) VALUES (?,?,?,?,?,?,?,?)",
+        "INSERT INTO `Athlete`(`NameAtl`, `PhoneNumber`, `Email`, `Height`, `Weight`, `ArmSpan`, `BirthDate`, `idUser`, `idteam`) VALUES (?,?,?,?,?,?,?,?,?)",
         [
           nameAtl,
           PhoneNumber,
@@ -284,6 +285,7 @@ app.post("/createatleta", (req, res) => {
           ArmSpan,
           BirthDate,
           idUser,
+          idTeam,
         ],
         (err, result) => {
           if (err) {
@@ -302,7 +304,7 @@ app.post("/createatleta", (req, res) => {
 
 app.get("/atletas", (req, res) => {
   db.query(
-    "SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser",
+    "SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate,Team.NameT FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser INNER JOIN Team ON Athlete.idteam = Team.idTeam ",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -439,6 +441,26 @@ app.get("/teams", (req, res) => {
       }
     }
   );
+});
+app.get("/getidteams", (req, res) => {
+  db.query("SELECT idTeam, NameT FROM `Team`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      var dataCas = [];
+      for (var i = 0; i < result.length; i++) {
+        dataCas.push(
+          JSON.parse(
+            `{"value":${result[i].idTeam}, "label": "${result[i].NameT}"}`
+          )
+        );
+      }
+      console.log(dataCas);
+
+      res.json(dataCas);
+    }
+  });
 });
 
 app.post("/createTeam", (req, res) => {
@@ -683,7 +705,7 @@ app.get("/GestoTecnico", (req, res) => {
 });
 
 app.post("/createGestoTecnico", (req, res) => {
-  const nome = req.body.nome;
+  const nomeGT = req.body.nomeGT;
   const Descrição = req.body.Descrição;
 
   db.query("SELECT * FROM `GestoTecnico` WHERE nome=?", Name, (err, result) => {
@@ -696,8 +718,8 @@ app.post("/createGestoTecnico", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO `GestoTecnico`( `nome`, `Descrição`) VALUES (?,?)",
-      [nome, Descrição],
+      "INSERT INTO `GestoTecnico`( `nomeGT`, `Descrição`) VALUES (?,?)",
+      [nomeGT, Descrição],
       (err, result) => {
         if (err) {
           console.log(err);
