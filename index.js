@@ -505,7 +505,7 @@ app.post("/deleteTeam", (req, res) => {
 
 //---------------------------ESCALÃO----------------------------------------
 app.get("/escalao", (req, res) => {
-  db.query("SELECT * FROM `Escalao`", (err, result) => {
+  db.query("SELECT * FROM `level`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -515,7 +515,7 @@ app.get("/escalao", (req, res) => {
 });
 
 app.get("/getidEscalao", (req, res) => {
-  db.query("SELECT `idEscalao`, `NameEs` FROM `Escalao`", (err, result) => {
+  db.query("SELECT `idEscalao`, `NameEs` FROM `level`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -539,7 +539,7 @@ app.post("/createEscalao", (req, res) => {
   const Descricao = req.body.Descricao;
   const NameEs = req.body.Name;
 
-  db.query("SELECT * FROM `Escalao` WHERE NameEs=?", Name, (err, result) => {
+  db.query("SELECT * FROM `level` WHERE NameEs=?", Name, (err, result) => {
     if (err) {
       res.send({ err: err });
     }
@@ -549,7 +549,7 @@ app.post("/createEscalao", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO `Escalao`( `NameEs`, `Descricao`) VALUES (?,?)",
+      "INSERT INTO `level`( `NameEs`, `Descricao`) VALUES (?,?)",
       [NameEs, Descricao],
       (err, result) => {
         if (err) {
@@ -565,7 +565,7 @@ app.post("/createEscalao", (req, res) => {
 app.post("/deleteEscalao", (req, res) => {
   const id = req.body.id;
 
-  db.query("DELETE FROM `Escalao` WHERE idEscalao =?;", [id], (err, result) => {
+  db.query("DELETE FROM `level` WHERE idEscalao =?;", [id], (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -695,7 +695,7 @@ app.post("/deleteExercise", (req, res) => {
 });
 //---------------------------Gesto TEcnico----------------------------------------
 app.get("/GestoTecnico", (req, res) => {
-  db.query("SELECT * FROM `GestoTecnico`", (err, result) => {
+  db.query("SELECT * FROM `Gesture`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -708,38 +708,34 @@ app.post("/createGestoTecnico", (req, res) => {
   const nomeGT = req.body.nomeGT;
   const Descrição = req.body.Descrição;
 
-  db.query(
-    "SELECT * FROM `GestoTecnico` WHERE nomeGT=?",
-    nomeGT,
-    (err, result) => {
-      if (err) {
-        res.send({ err: err });
-      }
-      console.log(result);
-
-      if (err) {
-        console.log(err);
-      }
-      db.query(
-        "INSERT INTO `GestoTecnico`( `nomeGT`, `Descrição`) VALUES (?,?)",
-        [nomeGT, Descrição],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          res.json({
-            mensagemStatus: "Gesto Tecnico Registado!",
-          });
-        }
-      );
+  db.query("SELECT * FROM `Gesture` WHERE nomeGT=?", nomeGT, (err, result) => {
+    if (err) {
+      res.send({ err: err });
     }
-  );
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `Gesture`( `nomeGT`, `Descrição`) VALUES (?,?)",
+      [nomeGT, Descrição],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Gesto Tecnico Registado!",
+        });
+      }
+    );
+  });
 });
 app.post("/deleteGestoTecnico", (req, res) => {
   const id = req.body.id;
 
   db.query(
-    "DELETE FROM `GestoTecnico` WHERE idGestoTecnico=?;",
+    "DELETE FROM `Gesture` WHERE idGestoTecnico=?;",
     [id],
     (err, result) => {
       if (err) {
@@ -829,7 +825,7 @@ app.post("/deleteSetExercise", (req, res) => {
 });
 //---------------------------Criterio ----------------------------------------
 app.get("/Criterio", (req, res) => {
-  db.query("SELECT * FROM `Criterio`", (err, result) => {
+  db.query("SELECT * FROM `method`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -842,47 +838,39 @@ app.post("/createCriterio", (req, res) => {
   const Descrição = req.body.Descrição;
   const idGesto = req.body.idGesto;
   const Check = req.body.Check;
-  db.query(
-    "SELECT * FROM `SetExercise` WHERE Descrição=?",
-    Name,
-    (err, result) => {
-      if (err) {
-        res.send({ err: err });
-      }
-      console.log(result);
-
-      if (err) {
-        console.log(err);
-      }
-      db.query(
-        "INSERT INTO `Criterio`( `Descrição`, `idGesto`, `Check`) VALUES (?,?,?)",
-        [Descrição, idGesto, Check],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          res.json({
-            mensagemStatus: "Criterio Registado!",
-          });
-        }
-      );
+  db.query("SELECT * FROM `method` WHERE Descrição=?", Name, (err, result) => {
+    if (err) {
+      res.send({ err: err });
     }
-  );
+    console.log(result);
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `method`( `Descrição`, `idGesto`, `Check`) VALUES (?,?,?)",
+      [Descrição, idGesto, Check],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Criterio Registado!",
+        });
+      }
+    );
+  });
 });
 app.post("/deleteCriterio", (req, res) => {
   const id = req.body.id;
 
-  db.query(
-    "DELETE FROM `Criterio` WHERE idCriterio=?;",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(`Criterio de id: ${id} foi eliminado!`);
-      }
+  db.query("DELETE FROM `method` WHERE idCriterio=?;", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(`Criterio de id: ${id} foi eliminado!`);
     }
-  );
+  });
 });
 
 //---------------------------Exercicio Set ----------------------------------------
