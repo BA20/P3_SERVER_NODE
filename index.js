@@ -259,8 +259,6 @@ app.get("/getidpai", (req, res) => {
 
 app.post("/createatleta", (req, res) => {
   const nameAtl = req.body.nameAtl;
-  const PhoneNumber = req.body.PhoneNumber;
-  const email = req.body.email;
   const Height = req.body.Height;
   const Weight = req.body.Weight;
   const ArmSpan = req.body.ArmSpan;
@@ -275,18 +273,8 @@ app.post("/createatleta", (req, res) => {
 
     if (result.length == 0) {
       db.query(
-        "INSERT INTO `Athlete`(`NameAtl`, `PhoneNumber`, `Email`, `Height`, `Weight`, `ArmSpan`, `BirthDate`, `idUser`, `idteam`) VALUES (?,?,?,?,?,?,?,?,?)",
-        [
-          nameAtl,
-          PhoneNumber,
-          email,
-          Height,
-          Weight,
-          ArmSpan,
-          BirthDate,
-          idUser,
-          idTeam,
-        ],
+        "INSERT INTO `Athlete`(`NameAtl`, `Height`, `Weight`, `ArmSpan`, `BirthDate`, `idUser`, `idteam`) VALUES (?,?,?,?,?,?,?,?,?)",
+        [nameAtl, Height, Weight, ArmSpan, BirthDate, idUser, idTeam],
         (err, result) => {
           if (err) {
             console.log(err);
@@ -304,7 +292,7 @@ app.post("/createatleta", (req, res) => {
 
 app.get("/atletas", (req, res) => {
   db.query(
-    "SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate,Team.NameT FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser INNER JOIN Team ON Athlete.idteam = Team.idTeam ",
+    "SELECT Athlete.idAthlete, Athlete.NameAtl, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate,Team.NameT FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser INNER JOIN Team ON Athlete.idteam = Team.idTeam ",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -432,7 +420,7 @@ app.get("/usersTreinador", (req, res) => {
 app.get("/teams", (req, res) => {
   db.query(
     //SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser
-    "SELECT Team.idTeam, Escalao.NameEs , Team.NameT, User.Name FROM Team INNER JOIN Escalao ON Team.idEscalao_team = Escalao.idEscalao INNER JOIN User ON Team.idtreinador = User.idUser",
+    "SELECT Team.idTeam, level.NameEs , Team.NameT, User.Name FROM Team INNER JOIN level ON Team.idEscalao_team = level.idEscalao INNER JOIN User ON Team.idtreinador = User.idUser",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -694,61 +682,8 @@ app.post("/deleteExercise", (req, res) => {
   );
 });
 //---------------------------Gesto TEcnico----------------------------------------
-app.get("/GestoTecnico", (req, res) => {
-  db.query("SELECT * FROM `Gesture`", (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.json(result);
-    }
-  });
-});
-
-app.post("/createGestoTecnico", (req, res) => {
-  const nomeGT = req.body.nomeGT;
-  const Descrição = req.body.Descrição;
-
-  db.query("SELECT * FROM `Gesture` WHERE nomeGT=?", nomeGT, (err, result) => {
-    if (err) {
-      res.send({ err: err });
-    }
-    console.log(result);
-
-    if (err) {
-      console.log(err);
-    }
-    db.query(
-      "INSERT INTO `Gesture`( `nomeGT`, `Descrição`) VALUES (?,?)",
-      [nomeGT, Descrição],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        res.json({
-          mensagemStatus: "Gesto Tecnico Registado!",
-        });
-      }
-    );
-  });
-});
-app.post("/deleteGestoTecnico", (req, res) => {
-  const id = req.body.id;
-
-  db.query(
-    "DELETE FROM `Gesture` WHERE idGestoTecnico=?;",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(`GestoTecnico de id: ${id} foi eliminado!`);
-      }
-    }
-  );
-});
-//---------------------------SetExercise ----------------------------------------
-app.get("/getidset", (req, res) => {
-  db.query("SELECT * FROM `SetExercise`", (err, result) => {
+app.get("/Gestoidn", (req, res) => {
+  db.query("SELECT `idGesto`, `NomeGesto` FROM `Gesto`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -757,7 +692,7 @@ app.get("/getidset", (req, res) => {
       for (var i = 0; i < result.length; i++) {
         dataCas.push(
           JSON.parse(
-            `{"value":${result[i].idSetExercise}, "label": "${result[i].NameSet}"}`
+            `{"value":${result[i].idGesto}, "label": "${result[i].NomeGesto}"}`
           )
         );
       }
@@ -768,8 +703,8 @@ app.get("/getidset", (req, res) => {
   });
 });
 
-app.get("/SetExercise", (req, res) => {
-  db.query("SELECT * FROM `SetExercise`", (err, result) => {
+app.get("/GestoTecnico", (req, res) => {
+  db.query("SELECT * FROM `Gesto`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -778,12 +713,13 @@ app.get("/SetExercise", (req, res) => {
   });
 });
 
-app.post("/createSetExercise", (req, res) => {
-  const NameSet = req.body.NameSet;
+app.post("/createGestoTecnico", (req, res) => {
+  const NomeGesto = req.body.NomeGesto;
+  const Descrição = req.body.Descrição;
 
   db.query(
-    "SELECT * FROM `SetExercise` WHERE NameSet=?",
-    NameSet,
+    "SELECT * FROM `Gesto` WHERE NomeGesto=?",
+    NomeGesto,
     (err, result) => {
       if (err) {
         res.send({ err: err });
@@ -794,128 +730,120 @@ app.post("/createSetExercise", (req, res) => {
         console.log(err);
       }
       db.query(
-        "INSERT INTO `SetExercise` (`NameSet`) VALUES (?)",
-        [NameSet],
+        "INSERT INTO `Gesto`(`NomeGesto`, `Descrição`) VALUES (?,?) ",
+        [NomeGesto, Descrição],
         (err, result) => {
           if (err) {
             console.log(err);
           }
           res.json({
-            mensagemStatus: "Set Registado!",
+            mensagemStatus: "Gesto Tecnico Registado!",
           });
         }
       );
     }
   );
 });
-app.post("/deleteSetExercise", (req, res) => {
+app.post("/deleteGestoTecnico", (req, res) => {
   const id = req.body.id;
 
-  db.query(
-    "DELETE FROM `SetExercise` WHERE idSetExercise?;",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(`Set de id: ${id} foi eliminado!`);
-      }
+  db.query("DELETE FROM `Gesto` WHERE idGesto=?;", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(`GestoTecnico de id: ${id} foi eliminado!`);
     }
-  );
+  });
 });
+
 //---------------------------Criterio ----------------------------------------
+//SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser
+
 app.get("/Criterio", (req, res) => {
-  db.query("SELECT * FROM `method`", (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.json(result);
-    }
-  });
-});
-
-app.post("/createCriterio", (req, res) => {
-  const Descrição = req.body.Descrição;
-  const idGesto = req.body.idGesto;
-  const Check = req.body.Check;
-  db.query("SELECT * FROM `method` WHERE Descrição=?", Name, (err, result) => {
-    if (err) {
-      res.send({ err: err });
-    }
-    console.log(result);
-
-    if (err) {
-      console.log(err);
-    }
-    db.query(
-      "INSERT INTO `method`( `Descrição`, `idGesto`, `Check`) VALUES (?,?,?)",
-      [Descrição, idGesto, Check],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        res.json({
-          mensagemStatus: "Criterio Registado!",
-        });
-      }
-    );
-  });
-});
-app.post("/deleteCriterio", (req, res) => {
-  const id = req.body.id;
-
-  db.query("DELETE FROM `method` WHERE idCriterio=?;", [id], (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.json(`Criterio de id: ${id} foi eliminado!`);
-    }
-  });
-});
-
-//---------------------------Exercicio Set ----------------------------------------
-app.get("/getExeSetExercise", (req, res) => {
   db.query(
-    "SELECT Ex_SetEx.idEx_SetEx, Exercise.Name, SetExercise.NameSet FROM Ex_SetEx INNER JOIN Exercise ON Ex_SetEx.SetExid = Exercise.idExercise INNER JOIN SetExercise ON Ex_SetEx.SetExid = SetExercise.idSetExercise",
+    "SELECT Criterio.idCriterio, Criterio.descricao, Gesto.NomeGesto FROM Criterio INNER JOIN Gesto ON Gesto.idGesto = Criterio.idGesto ",
     (err, result) => {
       if (err) {
         console.log(err);
       } else {
-        console.log(result);
+        console.log(result + "MASDASD");
         res.json(result);
       }
     }
   );
 });
 
-app.post("/createExeSetExercise", (req, res) => {
-  const id_set = req.body.id_set;
-  const id_exe = req.body.id_exe;
-
+app.post("/createCriterio", (req, res) => {
+  const Descrição = req.body.Descrição;
+  const idGesto = req.body.idGesto;
   db.query(
-    "INSERT INTO `Ex_SetEx`( `Extid`, `SetExid`) VALUES (?,?)",
-    [id_exe, id_set],
+    "SELECT * FROM `Criterio` WHERE descricao=?",
+    Descrição,
     (err, result) => {
+      if (err) {
+        res.send({ err: err });
+      }
+      console.log(result);
+
       if (err) {
         console.log(err);
       }
-      res.json({
-        mensagemStatus: "Relação Exercício Set Registado!",
-      });
+      db.query(
+        "INSERT INTO `Criterio`(`descricao`, `idGesto`) VALUES (?,?)",
+        [Descrição, idGesto],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+
+          res.json({
+            mensagemStatus: "Criterio Registado!",
+          });
+        }
+      );
     }
   );
 });
-app.post("/deleteExeSetExercise", (req, res) => {
+app.post("/deleteCriterio", (req, res) => {
   const id = req.body.id;
 
   db.query(
-    "DELETE  FROM `Ex_SetEx` WHERE idEx_SetEx = ?;",
+    "DELETE FROM `Criterio` WHERE idCriterio=?;",
     [id],
     (err, result) => {
       if (err) {
         console.log(err);
       } else {
-        res.json(`Relação Exercício Set de id: ${id} foi eliminado!`);
+        res.json(`Criterio de id: ${id} foi eliminado!`);
+      }
+    }
+  );
+});
+
+//--------------------------AVALIAÇÂO
+app.get("/avaliacao", (req, res) => {
+  db.query(
+    "SELECT  Athlete_Evaluation.idAthlete_Evaluation, Athlete.NameAtl, Athlete_Evaluation.Score FROM Athlete_Evaluation INNER JOIN Athlete ON Athlete.idAthlete = Athlete_Evaluation.idAthlete ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(result);
+      }
+    }
+  );
+});
+app.post("/deleteavaliacao", (req, res) => {
+  const id = req.body.id;
+
+  db.query(
+    "DELETE FROM `Athlete_Evaluation` WHERE idAthlete_Evaluation=?;",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(`Avaliação de id: ${id} foi eliminado!`);
       }
     }
   );
