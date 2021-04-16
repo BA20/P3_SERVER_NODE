@@ -58,7 +58,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   db.query(
-    "SELECT * FROM admin WHERE username =?;",
+    "SELECT * FROM `admin` WHERE username = ?;",
     username,
     (err, result) => {
       if (err) {
@@ -606,7 +606,7 @@ app.post("/deleteEvent", (req, res) => {
 //---------------------------Exercicio----------------------------------------
 
 app.get("/getidexe", (req, res) => {
-  db.query("SELECT idExercise, Name FROM `Exercise`", (err, result) => {
+  db.query("SELECT idExercise, Name FROM `Exercicio `", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -626,7 +626,7 @@ app.get("/getidexe", (req, res) => {
   });
 });
 app.get("/exercise", (req, res) => {
-  db.query("SELECT * FROM `Exercise`", (err, result) => {
+  db.query("SELECT * FROM `Exercicio`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -643,7 +643,7 @@ app.post("/createExercise", (req, res) => {
   const Duration = req.body.Duration;
   const Esquema_link = req.body.Esquema_link;
 
-  db.query("SELECT * FROM `Exercise` WHERE Name=?", Name, (err, result) => {
+  db.query("SELECT * FROM `Exercicio` WHERE Name=?", Name, (err, result) => {
     if (err) {
       res.send({ err: err });
     }
@@ -653,7 +653,7 @@ app.post("/createExercise", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO `Exercise`(`Name`, `Descrição`, `ObjectivoEsp`, `CriterioSucess`, `Duration`, `Esquema_link`) VALUES (?,?,?,?,?,?)",
+      "INSERT INTO `Exercicio`(`Name`, `Descrição`, `ObjectivoEsp`, `CriterioSucess`, `Duration`, `Esquema_link`) VALUES (?,?,?,?,?,?)",
       [Name, Descrição, ObjectivoEsp, CriterioSucess, Duration, Esquema_link],
       (err, result) => {
         if (err) {
@@ -670,7 +670,7 @@ app.post("/deleteExercise", (req, res) => {
   const id = req.body.id;
 
   db.query(
-    "DELETE FROM `Exercise` WHERE idExercise=?;",
+    "DELETE FROM `Exercicio` WHERE idExercise=?;",
     [id],
     (err, result) => {
       if (err) {
