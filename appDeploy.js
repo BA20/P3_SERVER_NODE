@@ -12,6 +12,10 @@ const bcrypt = require("bcrypt");
 const { json } = require("body-parser");
 const saltRounds = 10;
 
+const randomstring = require("randomstring");
+const fileupload = require("express-fileupload");
+app.use(fileupload());
+
 app.use(express.json());
 app.use(
   cors({
@@ -623,6 +627,44 @@ app.get("/getidexe", (req, res) => {
 
       res.json(dataCas);
     }
+  });
+});
+
+app.post("/exercise", (req, res) => {
+  const nome = req.body.nome;
+  const desc = req.body.desc;
+
+  const foto = req.files.foto;
+  const gesto = req.body.gesto;
+
+  const formato = req.files.foto.mimetype;
+  const novoformato = formato.substring(formato.length - 3, formato.length);
+
+  var a = Date.now();
+  foto.mv(`./uploadExercicios/${a}.${novoformato}`);
+
+  var url = a + `.${novoformato}`;
+
+  db.query("SELECT * FROM `Exercicio` WHERE exnome=?", nome, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO `Exercicio`(`idGesto`, `exnome`, `exdescricao`, `exurl`) VALUES (?,?,?,?)",
+      [gesto, nome, desc, url],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        res.json({
+          mensagemStatus: "Exercicio Registado!",
+        });
+      }
+    );
   });
 });
 app.get("/exercise", (req, res) => {
