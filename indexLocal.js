@@ -36,15 +36,14 @@ app.use(
 );
 
 const resultenv = dotenv.config();
-const hostname = process.env.HOST;
-const port = process.env.PORT;
-const Sessionssecret = process.env.SESSION_SECRET;
-
+const hostname = "localhost";
+const port = 3001;
+const Sessionssecret = "subscribe";
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PW,
-  database: process.env.DB_DATABASE,
+  host: "sarapaiva.webtuga.net",
+  user: "sarapaiv_vcviana",
+  password: "3PjClS0x7dzM",
+  database: "sarapaiv_VCV",
 });
 
 db.connect((err) => {
