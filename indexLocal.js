@@ -669,7 +669,7 @@ app.post("/createExercise", (req, res) => {
 app.get("/exercise/:gesto", (req, res) => {
 
   const gesto = req.params.gesto;
-  var id= 0;
+
   db.query("SELECT idGesto FROM `Gesto` WHERE NomeGesto=?", gesto, (err, result) => {
     if (err) {
       console.log(err);
@@ -678,16 +678,13 @@ app.get("/exercise/:gesto", (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          console.log(result)
+          //console.log(result)
           res.json(result)
         }
       });
     }
   });
-  console.log(id)
-  
-  
-  
+
 });
 
 app.post("/deleteExercise", (req, res) => {
