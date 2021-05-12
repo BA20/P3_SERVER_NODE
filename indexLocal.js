@@ -674,19 +674,19 @@ app.get("/exercise/:gesto", (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      id = result[0].idGesto;
+      db.query("SELECT * FROM `Exercicio` WHERE idGesto=?", result[0].idGesto, (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(result)
+          res.json(result)
+        }
+      });
     }
   });
   console.log(id)
   
-  db.query("SELECT * FROM `Exercicio` WHERE idGesto=?", id, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(result)
-      res.json(result)
-    }
-  });
+  
   
 });
 
