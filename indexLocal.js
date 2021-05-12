@@ -100,7 +100,7 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
-app.get("/isUserAuth", verifyJWT, (req, res) => {});
+app.get("/isUserAuth", verifyJWT, (req, res) => { });
 
 app.get("/login", (req, res) => {
   if (req.session.user) {
@@ -168,13 +168,13 @@ app.post("/createUserPais", (req, res) => {
 
   console.log(
     "name: " +
-      name +
-      " email: " +
-      email +
-      " pass: " +
-      password +
-      " " +
-      PhoneNumber
+    name +
+    " email: " +
+    email +
+    " pass: " +
+    password +
+    " " +
+    PhoneNumber
   );
 
   db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
@@ -364,13 +364,13 @@ app.post("/createUserTreinador", (req, res) => {
 
   console.log(
     "name: " +
-      name +
-      " email: " +
-      email +
-      " pass: " +
-      password +
-      " " +
-      PhoneNumber
+    name +
+    " email: " +
+    email +
+    " pass: " +
+    password +
+    " " +
+    PhoneNumber
   );
 
   db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
@@ -665,6 +665,31 @@ app.post("/createExercise", (req, res) => {
     );
   });
 });
+
+app.get("/exercise/:gesto", (req, res) => {
+
+  const gesto = req.params.gesto;
+  var id= 0;
+  db.query("SELECT idGesto FROM `Gesto` WHERE NomeGesto=?", gesto, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      id = result[0].idGesto;
+    }
+  });
+  console.log(id)
+  
+  db.query("SELECT * FROM `Exercicio` WHERE idGesto=?", id, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result)
+      res.json(result)
+    }
+  });
+  
+});
+
 app.post("/deleteExercise", (req, res) => {
   const id = req.body.id;
 
