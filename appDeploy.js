@@ -638,12 +638,12 @@ app.post("/exercise", (req, res) => {
   const gesto = req.body.gesto;
 
   const formato = req.files.foto.mimetype;
-  const novoformato = formato.substring(formato.length - 3, formato.length);
+  const novoformato = formato.split("/");
 
   var a = Date.now();
-  foto.mv(`./uploadExercicios/${a}.${novoformato}`);
+  foto.mv(`../public_html/uploadExercicios/${a}.${novoformato[1]}`);
 
-  var url = a + `.${novoformato}`;
+  var url = a + `.${novoformato[1]}`;
 
   db.query("SELECT * FROM `Exercicio` WHERE exnome=?", nome, (err, result) => {
     if (err) {
@@ -677,13 +677,37 @@ app.get("/exercise", (req, res) => {
   });
 });
 
+app.get("/exercise/:gesto", (req, res) => {
+  const gesto = req.params.gesto;
+
+  db.query(
+    "SELECT idGesto FROM `Gesto` WHERE NomeGesto=?",
+    gesto,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        db.query(
+          "SELECT * FROM `Exercicio` WHERE idGesto=?",
+          result[0].idGesto,
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              //console.log(result)
+              res.json(result);
+            }
+          }
+        );
+      }
+    }
+  );
+});
 app.post("/createExercise", (req, res) => {
-  const Name = req.body.Name;
-  const Descrição = req.body.Descrição;
-  const ObjectivoEsp = req.body.ObjectivoEsp;
-  const CriterioSucess = req.body.CriterioSucess;
-  const Duration = req.body.Duration;
-  const Esquema_link = req.body.Esquema_link;
+  const exnome = req.body.exnome;
+  const exurl = req.body.exurl;
+  const idGesto = req.body.idGesto;
+  const exdescricao = req.body.exdescricao;
 
   db.query("SELECT * FROM `Exercicio` WHERE Name=?", Name, (err, result) => {
     if (err) {
@@ -695,8 +719,8 @@ app.post("/createExercise", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO `Exercicio`(`Name`, `Descrição`, `ObjectivoEsp`, `CriterioSucess`, `Duration`, `Esquema_link`) VALUES (?,?,?,?,?,?)",
-      [Name, Descrição, ObjectivoEsp, CriterioSucess, Duration, Esquema_link],
+      "INSERT INTO `Exercicio`(`idGesto`, `exnome`, `exurl`, `exdescricao`) VALUES (?,?,?,?)",
+      [idGesto, exnome, exurl, exdescricao],
       (err, result) => {
         if (err) {
           console.log(err);
@@ -712,7 +736,7 @@ app.post("/deleteExercise", (req, res) => {
   const id = req.body.id;
 
   db.query(
-    "DELETE FROM `Exercicio` WHERE idExercise=?;",
+    "DELETE FROM `Exercicio` WHERE idExercicio=68",
     [id],
     (err, result) => {
       if (err) {
