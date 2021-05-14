@@ -12,10 +12,14 @@ const bcrypt = require("bcrypt");
 const { json } = require("body-parser");
 const saltRounds = 10;
 
+const randomstring = require("randomstring");
+const fileupload = require("express-fileupload");
+app.use(fileupload());
+
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://volleyadmin.sarapaiva.webtuga.net"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
   })
@@ -36,14 +40,15 @@ app.use(
 );
 
 const resultenv = dotenv.config();
-const hostname = "localhost";
-const port = 3001;
-const Sessionssecret = "subscribe";
+const hostname = process.env.HOST;
+const port = process.env.PORT;
+const Sessionssecret = process.env.SESSION_SECRET;
+
 const db = mysql.createConnection({
-  host: "sarapaiva.webtuga.net",
-  user: "sarapaiv_vcviana",
-  password: "3PjClS0x7dzM",
-  database: "sarapaiv_VCV",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PW,
+  database: process.env.DB_DATABASE,
 });
 
 db.connect((err) => {
@@ -100,7 +105,7 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
-app.get("/isUserAuth", verifyJWT, (req, res) => { });
+app.get("/isUserAuth", verifyJWT, (req, res) => {});
 
 app.get("/login", (req, res) => {
   if (req.session.user) {
@@ -168,13 +173,13 @@ app.post("/createUserPais", (req, res) => {
 
   console.log(
     "name: " +
-    name +
-    " email: " +
-    email +
-    " pass: " +
-    password +
-    " " +
-    PhoneNumber
+      name +
+      " email: " +
+      email +
+      " pass: " +
+      password +
+      " " +
+      PhoneNumber
   );
 
   db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
@@ -364,13 +369,13 @@ app.post("/createUserTreinador", (req, res) => {
 
   console.log(
     "name: " +
-    name +
-    " email: " +
-    email +
-    " pass: " +
-    password +
-    " " +
-    PhoneNumber
+      name +
+      " email: " +
+      email +
+      " pass: " +
+      password +
+      " " +
+      PhoneNumber
   );
 
   db.query("SELECT * FROM User WHERE Email = ?", email, (err, result) => {
@@ -624,6 +629,51 @@ app.get("/getidexe", (req, res) => {
     }
   });
 });
+
+app.post("/exercise", (req, res) => {
+  const nome = req.body.nome;
+  const desc = req.body.desc;
+
+  const foto = req.files.foto;
+  const gesto = req.body.gesto;
+
+  const formato = req.files.foto.mimetype;
+  const novoformato = formato.split("/");
+
+  var a = Date.now();
+  foto.mv(`./uploadExercicios/${a}.${novoformato[1]}`);
+
+  var url = a + `.${novoformato[1]}`;
+
+  db.query("SELECT * FROM `Exercicio` WHERE exnome=?", nome, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+
+    db.query(
+      "SELECT idGesto FROM `Gesto` WHERE NomeGesto=?",
+      gesto,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          db.query(
+            "INSERT INTO `Exercicio`(`idGesto`, `exnome`, `exdescricao`, `exurl`) VALUES (?,?,?,?)",
+            [result[0].idGesto, nome, desc, url],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              }
+              res.json({
+                mensagemStatus: "Exercicio Registado!",
+              });
+            }
+          );
+        }
+      }
+    );
+  });
+});
 app.get("/exercise", (req, res) => {
   db.query("SELECT * FROM `Exercicio`", (err, result) => {
     if (err) {
@@ -634,13 +684,37 @@ app.get("/exercise", (req, res) => {
   });
 });
 
+app.get("/exercise/:gesto", (req, res) => {
+  const gesto = req.params.gesto;
+
+  db.query(
+    "SELECT idGesto FROM `Gesto` WHERE NomeGesto=?",
+    gesto,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        db.query(
+          "SELECT * FROM `Exercicio` WHERE idGesto=?",
+          result[0].idGesto,
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              //console.log(result)
+              res.json(result);
+            }
+          }
+        );
+      }
+    }
+  );
+});
 app.post("/createExercise", (req, res) => {
-  const Name = req.body.Name;
-  const Descrição = req.body.Descrição;
-  const ObjectivoEsp = req.body.ObjectivoEsp;
-  const CriterioSucess = req.body.CriterioSucess;
-  const Duration = req.body.Duration;
-  const Esquema_link = req.body.Esquema_link;
+  const exnome = req.body.exnome;
+  const exurl = req.body.exurl;
+  const idGesto = req.body.idGesto;
+  const exdescricao = req.body.exdescricao;
 
   db.query("SELECT * FROM `Exercicio` WHERE Name=?", Name, (err, result) => {
     if (err) {
@@ -652,8 +726,8 @@ app.post("/createExercise", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO `Exercicio`(`Name`, `Descrição`, `ObjectivoEsp`, `CriterioSucess`, `Duration`, `Esquema_link`) VALUES (?,?,?,?,?,?)",
-      [Name, Descrição, ObjectivoEsp, CriterioSucess, Duration, Esquema_link],
+      "INSERT INTO `Exercicio`(`idGesto`, `exnome`, `exurl`, `exdescricao`) VALUES (?,?,?,?)",
+      [idGesto, exnome, exurl, exdescricao],
       (err, result) => {
         if (err) {
           console.log(err);
@@ -665,33 +739,11 @@ app.post("/createExercise", (req, res) => {
     );
   });
 });
-
-app.get("/exercise/:gesto", (req, res) => {
-
-  const gesto = req.params.gesto;
-
-  db.query("SELECT idGesto FROM `Gesto` WHERE NomeGesto=?", gesto, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      db.query("SELECT * FROM `Exercicio` WHERE idGesto=?", result[0].idGesto, (err, result) => {
-        if (err) {
-          console.log(err);
-        } else {
-          //console.log(result)
-          res.json(result)
-        }
-      });
-    }
-  });
-
-});
-
 app.post("/deleteExercise", (req, res) => {
   const id = req.body.id;
 
   db.query(
-    "DELETE FROM `Exercicio` WHERE idExercise=?;",
+    "DELETE FROM `Exercicio` WHERE idExercicio=68",
     [id],
     (err, result) => {
       if (err) {
