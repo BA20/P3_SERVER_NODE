@@ -122,7 +122,7 @@ app.post("/entrar", (req, res) => {
         }
         bcrypt.compare(password, result[0].password, (error, response) => {
           if (response) {
-            res.json({ status: true, user: username });
+            res.json({ status: true, user: username, tipo: result[0].tipo });
           } else {
             console.log(error);
           }
