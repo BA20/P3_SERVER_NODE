@@ -105,15 +105,42 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
+app.post("/entrar", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  db.query("SELECT * from User where Name = ?", username, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.send(err);
+    }
+
+    if (result.length > 0) {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        if (err) {
+          console.log(err);
+        }
+        bcrypt.compare(password, result[0].password, (error, response) => {
+          if (response) {
+            res.json({ status: true, user: username });
+          } else {
+            console.log(error);
+          }
+        });
+      });
+    }
+  });
+});
+
 app.get("/isUserAuth", verifyJWT, (req, res) => {});
 
-app.get("/login", (req, res) => {
+/*app.get("/login", (req, res) => {
   if (req.session.user) {
     res.send({ loggedIn: true, user: req.session.user });
   } else {
     res.send({ loggedIn: false });
   }
-});
+});*/
 
 app.post("/login", (req, res) => {
   const username = req.body.username;
