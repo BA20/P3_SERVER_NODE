@@ -4,6 +4,8 @@ const mysql = require("mysql");
 const cors = require("cors");
 const app = express();
 
+
+
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
@@ -164,6 +166,37 @@ app.post("/login", (req, res) => {
     }
   );
 });
+app.post("/entrar", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const email = username.toLowerCase();
+
+  db.query("SELECT * from User where email = ?", email, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.send(err);
+    }
+    
+
+    if (result.length > 0) {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        if (err) {
+            res.json({err: err});
+          console.log(err);
+        }
+        bcrypt.compare(password, result[0].password, (error, response) => {
+          if (response) {
+            res.json({ status: true, user: username, tipo: result[0].tipo, id: result[0].idUser, nome: result[0].username });
+          } else {
+            res.json({status: false})
+          }
+        });
+      });
+    } else {
+            res.json({status: false})
+          }
+  });
+});
 //---------------------------UserPAIS----------------------------------------
 app.post("/createUserPais", (req, res) => {
   const name = req.body.name;
@@ -193,7 +226,7 @@ app.post("/createUserPais", (req, res) => {
           console.log(err);
         }
         db.query(
-          "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,0)",
+          "INSERT INTO `User`(`username`, `email`, `password`, `phonenumber`, `Tipo`) VALUES (?,?,?,?,0)",
           [name, email, hash, PhoneNumber],
           (err, result) => {
             if (err) {
@@ -236,10 +269,33 @@ app.post("/deleteUser", (req, res) => {
 });
 
 //---------------------------Atleta--------------------------------------
+app.get("/atleta", (req, res) => {
+  db.query("SELECT * FROM `Athlete` INNER JOIN `Team` T on `Athlete`.`idTeam` = `T`.`idTeam`", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      res.json(result);
+    }
+  });
+});
+
+app.get("/atleta/:id", (req, res) => {
+    const id = req.params.id;
+    
+  db.query("SELECT * FROM Athlete WHERE `idUser`= ?", [id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      res.json(result);
+    }
+  });
+});
 
 app.get("/getidpai", (req, res) => {
   db.query(
-    "SELECT `idUser`, `Name` FROM `User` WHERE Tipo = 0",
+    "SELECT `idUser`, `username` FROM `User` WHERE Tipo = 0",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -296,8 +352,8 @@ app.post("/createatleta", (req, res) => {
 
 app.get("/atletas", (req, res) => {
   db.query(
-    "SELECT Athlete.idAthlete, Athlete.NameAtl, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate,Team.NameT FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser INNER JOIN Team ON Athlete.idteam = Team.idTeam ",
-    (err, result) => {
+    "SELECT Athlete.idAthlete, Athlete.NameAtl, User.username , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate,Team.NameT FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser INNER JOIN Team ON Athlete.idteam = Team.idTeam ",
+   (err, result) => {
       if (err) {
         console.log(err);
       } else {
@@ -339,7 +395,7 @@ app.post("/deleteAtleta", (req, res) => {
 //---------------------------UserTreinador----------------------------------------
 app.get("/getidtreinador", (req, res) => {
   db.query(
-    "SELECT `idUser`, `Name` FROM `User` WHERE Tipo = 1",
+    "SELECT `idUser`, `username` FROM `User` WHERE Tipo = 1",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -362,7 +418,7 @@ app.get("/getidtreinador", (req, res) => {
 });
 
 app.post("/createUserTreinador", (req, res) => {
-  const name = req.body.name;
+  const name = req.body.username;
   const email = req.body.email;
   const password = req.body.password;
   const PhoneNumber = req.body.PhoneNumber;
@@ -389,7 +445,7 @@ app.post("/createUserTreinador", (req, res) => {
           console.log(err);
         }
         db.query(
-          "INSERT INTO `User`(`Name`, `Email`, `PassWord`, `PhoneNumber`, `Tipo`) VALUES (?,?,?,?,1)",
+          "INSERT INTO `User`(`username`, `email`, `password`, `phonenumber`, `tipo`) VALUES (?,?,?,?,1)",
           [name, email, hash, PhoneNumber],
           (err, result) => {
             if (err) {
@@ -421,10 +477,23 @@ app.get("/usersTreinador", (req, res) => {
 
 //---------------------------Team----------------------------------------
 
+app.get("/team", (req, res) => {
+db.query(
+    
+    "SELECT * FROM `Team`",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(result);
+      }
+    }
+  );
+});
 app.get("/teams", (req, res) => {
   db.query(
     //SELECT Athlete.idAthlete, Athlete.NameAtl , Athlete.PhoneNumber , Athlete.Email, User.Name , Athlete.Height, Athlete.Weight, Athlete.ArmSpan, Athlete.BirthDate FROM Athlete INNER JOIN User ON Athlete.idUser = User.idUser
-    "SELECT Team.idTeam, level.NameEs , Team.NameT, User.Name FROM Team INNER JOIN level ON Team.idEscalao_team = level.idEscalao INNER JOIN User ON Team.idtreinador = User.idUser",
+    "SELECT Team.idTeam, level.NameEs , Team.NameT, User.username FROM Team INNER JOIN level ON Team.idEscalao_team = level.idEscalao INNER JOIN User ON Team.idtreinador = User.idUser",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -580,12 +649,12 @@ app.post("/createEvent", (req, res) => {
   const ev_inicio = req.body.ev_inicio;
   const ev_fim = req.body.ev_fim;
   const idteam = req.body.idteam;
-  const idestado = req.body.idestado;
   const local = req.body.local;
+  const tipo = req.body.tipo;
 
   db.query(
-    "INSERT INTO `Events`( `ev_inicio`, `ev_fim`, `idteam`, `idestado`, `local`) VALUES (?,?,?,?,?)",
-    [ev_inicio, ev_fim, idteam, idestado, local],
+    "INSERT INTO `Events`( `ev_inicio`, `ev_fim`, `idteam`, `tipo`, `local`) VALUES (?,?,?,?,?)",
+    [ev_inicio, ev_fim, idteam, tipo, local],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -596,6 +665,18 @@ app.post("/createEvent", (req, res) => {
     }
   );
 });
+app.get('/getRecentEvent', (req, res) => {
+  db.query(
+    'SELECT * FROM `Events` WHERE ev_inicio >= UNIX_TIMESTAMP() ORDER BY ev_inicio ASC LIMIT 2',
+    (err, result) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.json(result)
+      }
+    },
+  )
+})
 app.post("/deleteEvent", (req, res) => {
   const id = req.body.id;
 
@@ -629,7 +710,17 @@ app.get("/getidexe", (req, res) => {
     }
   });
 });
-
+app.get("/exercicio/:idAtleta", (req, res) => {
+    
+  const id = req.params.idAtleta
+  db.query("SELECT * FROM `Ex_Athlete` INNER JOIN `Exercicio` ON Ex_Athlete.idExercicio = Exercicio.idExercicio WHERE idAthlete=?;", id, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
 app.post("/exercise", (req, res) => {
   const nome = req.body.nome;
   const desc = req.body.desc;
@@ -650,25 +741,61 @@ app.post("/exercise", (req, res) => {
       res.send({ err: err });
     }
 
-    if (err) {
-      console.log(err);
-    }
     db.query(
-      "INSERT INTO `Exercicio`(`idGesto`, `exnome`, `exdescricao`, `exurl`) VALUES (?,?,?,?)",
-      [gesto, nome, desc, url],
+      "SELECT idGesto FROM `Gesto` WHERE NomeGesto=?",
+      gesto,
       (err, result) => {
         if (err) {
           console.log(err);
+        } else {
+          db.query(
+            "INSERT INTO `Exercicio`(`idGesto`, `exnome`, `exdescricao`, `exurl`) VALUES (?,?,?,?)",
+            [result[0].idGesto, nome, desc, url],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              }
+              res.json({
+                mensagemStatus: "Exercicio Registado!",
+              });
+            }
+          );
         }
-        res.json({
-          mensagemStatus: "Exercicio Registado!",
-        });
       }
     );
   });
 });
+app.post("/uploadVideo", (req, res) => {
+  const video = req.files.video;
+  const exercicio = req.body.exercicio;
+  const idAluno = req.body.idAluno;
+
+  const formato = req.files.video.mimetype;
+  const novoformato = formato.split("/");
+  console.log(novoformato);
+
+  var a = Date.now();
+  video.mv(`../public_html/uploadExercicios/${a}.${novoformato[1]}`);
+
+  var url = a + `.${novoformato[1]}`;
+
+  db.query(
+    "INSERT INTO `Ex_Athlete`(`idAthlete`, `urlEx_Athlete`, `idExercicio`) VALUES (?,?, ?)",
+    [idAluno, url, exercicio],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      res.json({
+        mensagemStatus: "Upload Registado!",
+      });
+    }
+  );
+});
+
+
 app.get("/exercise", (req, res) => {
-  db.query("SELECT * FROM `Exercicio`", (err, result) => {
+  db.query("SELECT * FROM `Exercicio` INNER JOIN `Gesto` G on `Exercicio`.`idGesto` = `G`.`idGesto`", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -678,36 +805,31 @@ app.get("/exercise", (req, res) => {
 });
 
 app.get("/exercise/:gesto", (req, res) => {
+
   const gesto = req.params.gesto;
 
-  db.query(
-    "SELECT idGesto FROM `Gesto` WHERE NomeGesto=?",
-    gesto,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        db.query(
-          "SELECT * FROM `Exercicio` WHERE idGesto=?",
-          result[0].idGesto,
-          (err, result) => {
-            if (err) {
-              console.log(err);
-            } else {
-              //console.log(result)
-              res.json(result);
-            }
-          }
-        );
-      }
+  db.query("SELECT idGesto FROM `Gesto` WHERE NomeGesto=?", gesto, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      db.query("SELECT * FROM `Exercicio` WHERE idGesto=?", result[0].idGesto, (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          //console.log(result)
+          res.json(result)
+        }
+      });
     }
-  );
+  });
+
 });
 app.post("/createExercise", (req, res) => {
   const exnome = req.body.exnome;
   const exurl = req.body.exurl;
   const idGesto = req.body.idGesto;
   const exdescricao = req.body.exdescricao;
+
 
   db.query("SELECT * FROM `Exercicio` WHERE Name=?", Name, (err, result) => {
     if (err) {
@@ -838,6 +960,32 @@ app.get("/Criterio", (req, res) => {
     }
   );
 });
+app.get("/Criterio/:gesto", (req, res) => {
+  const gesto = req.params.gesto;
+
+  db.query(
+    "SELECT idGesto FROM `Gesto` WHERE NomeGesto=?",
+    gesto,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        db.query(
+          "SELECT * FROM `Criterio` WHERE idGesto=?",
+          result[0].idGesto,
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              //console.log(result)
+              res.json(result);
+            }
+          }
+        );
+      }
+    }
+  );
+});
 
 app.post("/createCriterio", (req, res) => {
   const Descrição = req.body.Descrição;
@@ -887,9 +1035,11 @@ app.post("/deleteCriterio", (req, res) => {
 });
 
 //--------------------------AVALIAÇÂO
-app.get("/avaliacao", (req, res) => {
+app.get("/avaliacao/:id", (req, res) => {
+  const id = req.params.id;
+
   db.query(
-    "SELECT  Athlete_Evaluation.idAthlete_Evaluation, Athlete.NameAtl, Athlete_Evaluation.Score FROM Athlete_Evaluation INNER JOIN Athlete ON Athlete.idAthlete = Athlete_Evaluation.idAthlete ",
+    "SELECT * FROM `Athlete_Evaluation` WHERE `idAthlete` = ?", [id],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -899,6 +1049,21 @@ app.get("/avaliacao", (req, res) => {
     }
   );
 });
+
+app.get("/avaliacao", (req, res) => {
+  db.query(
+    "SELECT Athlete_Evaluation.idAthlete_Evaluation,Athlete.NameAtl, Athlete_Evaluation.Score, Athlete_Evaluation.date FROM Athlete_Evaluation INNER JOIN Athlete ON Athlete_Evaluation.idAthlete = Athlete.idAthlete ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.json(result);
+      }
+    }
+  );
+});
+
+
 app.post("/deleteavaliacao", (req, res) => {
   const id = req.body.id;
 
@@ -914,6 +1079,43 @@ app.post("/deleteavaliacao", (req, res) => {
     }
   );
 });
+
+app.post("/addGestoEvaluation", (req, res) => {
+  const idGesto = req.body.idGesto
+  const idAthlete = req.body.idAtleta
+  const Score = req.body.score
+
+  db.query(
+    'INSERT INTO `Gesto_Evaluation` (`idGesto`, `idAthlete`, `Score`) VALUES (?, ?, ?)',
+    [idGesto, idAthlete, Score],
+    (err, result) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.json({mensagemStatus: 'Avalialão Adicionada'})
+      }
+    }
+  );
+});
+
+app.post("/addEvaluation", (req, res) => {
+  const idAtleta = req.body.idAtleta
+  const score = req.body.score
+  const data = req.body.data
+
+  db.query(
+    'INSERT INTO `Athlete_Evaluation` (`idAthlete`, `Score`, `date`) VALUES (?, ?, ?)',
+    [idAtleta, score, data],
+    (err, result) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.json({mensagemStatus: 'Avalialão Adicionada'})
+      }
+    }
+  );
+});
+
 
 app.listen(port, () => {
   console.log(`runnig server! http://${hostname}:${port}/`);
